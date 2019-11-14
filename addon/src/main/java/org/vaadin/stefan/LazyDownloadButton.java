@@ -4,15 +4,12 @@ import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.dom.DomEvent;
-import com.vaadin.flow.dom.DomEventListener;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.InputStreamFactory;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.shared.Registration;
 
 import java.io.InputStream;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Executors;
@@ -94,12 +91,6 @@ public class LazyDownloadButton extends Button {
             setIcon(icon);
         }
 
-        // needed?
-//        if (downloadStartedListener != null) {
-//            getElement().addEventListener("click", event1 -> downloadStartedListener.accept(this, event1));
-//        }
-
-        /*button.*/
         super.addClickListener(event -> {
             // we add the anchor to download in the parent of the button - if there are scenarios where the anchor
             // should be placed somewhere else, this needs to be extended. Cannot be placed inside of the button
@@ -112,15 +103,12 @@ public class LazyDownloadButton extends Button {
                 if (anchor == null) {
                     anchor = new Anchor();
                     Element anchorElement = anchor.getElement();
-                    anchorElement.setAttribute(DEFAULT_FILE_NAME, true);
+                    anchorElement.setAttribute("download", true);
+                    anchorElement.getStyle().set("display", "none");
                     component.getElement().appendChild(anchor.getElement());
 
                     anchorElement.addEventListener("click", event1 -> fireEvent(new DownloadStartsEvent(this, true, event1)));
                 }
-
-//                if (buttonClickListener != null) {
-//                    buttonClickListener.accept(this, event);
-//                }
 
                 Optional<UI> optionalUI = getUI();
                 Executors.newSingleThreadExecutor().execute(() -> {
@@ -140,15 +128,16 @@ public class LazyDownloadButton extends Button {
                 });
             });
         });
-//        add(button);
     }
 
     @Override
     protected void onDetach(DetachEvent detachEvent) {
-        super.onDetach(detachEvent);
         if (anchor != null) {
-            getParent().ifPresent(component -> {
-                component.getElement().removeChild(anchor.getElement());
+            getParent().map(Component::getElement).ifPresent(parentElement -> {
+                Element anchorElement = anchor.getElement();
+                if (anchorElement != null && parentElement.getChildren().anyMatch(anchorElement::equals)) {
+                    parentElement.removeChild(anchorElement);
+                }
             });
         }
     }
