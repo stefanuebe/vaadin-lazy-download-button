@@ -31,7 +31,7 @@ public class Demo extends VerticalLayout {
     private ProgressBar bar;
 
     public Demo() {
-        add(new H4("Lazy download button demo"));
+        add(new H4("Lazy download button demo, version 1.0.0"));
         add(new Span("All examples download the Apache License 2.0 as text. The download has an artificial timeout of 2.5 seconds to show the still active UI during the download."));
 
         add(createTitle("Basic example"));
@@ -82,9 +82,9 @@ public class Demo extends VerticalLayout {
         StreamResource href = new StreamResource("old-" + getFileName(), this::createFileInputStream);
         href.setCacheTime(0);
 
-        Anchor download = new Anchor(href, "Eager download");
+        Anchor download = new Anchor(href, "");
         download.getElement().setAttribute("download", true);
-        Button button = new Button(new Icon(VaadinIcon.DOWNLOAD_ALT));
+        Button button = new Button("Eager download", new Icon(VaadinIcon.DOWNLOAD_ALT));
         button.setDisableOnClick(true);
         download.add(button);
         add(download);
@@ -113,7 +113,7 @@ public class Demo extends VerticalLayout {
 
     private InputStream createFileInputStream() {
         try {
-            Thread.sleep(10000);
+            Thread.sleep(2500);
             return Files.newInputStream(Paths.get("LICENSE"));
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
